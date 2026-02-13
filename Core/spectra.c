@@ -3,13 +3,16 @@
 #include <math.h>
 #include <omp.h>
 #include <time.h>
-
-
-
 #include <math.h>
+#include <gsl/gsl_interp2d.h>
+
+
+#include "astro_const.h"
 #include "halo_mass_funcs.h"
+
 #define _USE_MATH_DEFINES
 #define m_e__GeV 0.0005109989
+
 double q_p_inject = 2.2;//proton injection spectral index
 double q_e_inject = 2.2;//electron injection spectral index
 
@@ -167,7 +170,7 @@ int main(int argc,char *argv[])
         h__pc[i] = pow( sig_gas__kmsm1[i], 2 )/( M_PI * G_h * ( Sig_gas__Msolpcm2[i] + 
                    sig_gas__kmsm1[i]/sigma_star_Bezanson__kmsm1( M_star__Msol[i], Re__kpc[i] ) * Sig_star__Msolpcm2[i] ) );//scale height in pc in hydrostatic equilibrium
 
-        n_H__cmm3[i] = Sig_gas__Msolpcm2[i]/( mu_H * m_H__kg * 2. * h__pc[i] ) * Msol__kg/pow( pc__cm, 3 );// midplane hydrogen density in cm^-3
+        n_H__cmm3[i] = Sig_gas__Msolpcm2[i]/( mu_H * m_H_kg * 2. * h__pc[i] ) * Msol_kg/pow( pc_cm, 3 );// midplane hydrogen density in cm^-3
 
         n__cmm3[i] = n_H__cmm3[i] * mu_H/mu_p;//total gas number density in cm^-3
 
@@ -175,7 +178,7 @@ int main(int argc,char *argv[])
         v_Ai = 1000. * ( u_LA/10. )/( sqrt(chi/1e-4) * M_A );//ion alfven speed in km/s
         L_A = h__pc[i]/pow(M_A,3);//alfvenic break scale in MHD turbulence in pc
 
-        B__G[i] = sqrt(4.* M_PI * chi * n__cmm3[i] * mu_p * m_H__kg * 1e3) * v_Ai * 1e5;
+        B__G[i] = sqrt(4.* M_PI * chi * n__cmm3[i] * mu_p * m_H_kg * 1e3) * v_Ai * 1e5;
 
         if (log10(SFR__Msolyrm1[i]/M_star__Msol[i]) > -10.)//controls CR escape in halo
         {
@@ -187,21 +190,21 @@ int main(int argc,char *argv[])
         }
 
     //    CnormE[i] = C_norm_E(E_cut[i]);
-        CnormE[i] = C_norm_E( q_p_inject, m_p__GeV, T_p_cutoff__GeV);//normalization constant for cosmic ray energy
+        CnormE[i] = C_norm_E( q_p_inject, m_p_GeV, T_p_cutoff__GeV);//normalization constant for cosmic ray energy
 
-        D0 = v_Ai * L_A * 1e5 * pc__cm;//diffusion coefficient at 1 GeV in cm^2/s
+        D0 = v_Ai * L_A * 1e5 * pc_cm;//diffusion coefficient at 1 GeV in cm^2/s
         // calculate loss time
-        t_loss_s = 1./(1./(1./( n__cmm3[i] * sigma_pp_cm2 * eta_pp * c__cmsm1 )) + 1./(pow( h__pc[i] * pc__cm,2)/D0) );
+        t_loss_s = 1./(1./(1./( n__cmm3[i] * sigma_pp_cm2 * eta_pp * c__cmsm1 )) + 1./(pow( h__pc[i] * pc_cm,2)/D0) );
         // calculate calorimetry fraction normalization constant
-        C[i] = SFR__Msolyrm1[i] * n_SN_Msolm1 * f_EtoCR * E_SN_erg * erg__GeV/yr__s * t_loss_s/( CnormE[i] * 2. * A_Re__pc2[i] * 2. * h__pc[i] * pow(pc__cm, 3) );
+        C[i] = SFR__Msolyrm1[i] * n_SN_Msolm1 * f_EtoCR * E_SN_erg * erg__GeV/yr__s * t_loss_s/( CnormE[i] * 2. * A_Re__pc2[i] * 2. * h__pc[i] * pow(pc_cm, 3) );
         // calculate primary CRe injection rate normalization in CRe/s/GeV
         Ce_Esm1[i] = f_CRe_CRp * SFR__Msolyrm1[i] * n_SN_Msolm1 * f_EtoCR * E_SN_erg * erg__GeV/( yr__s * C_norm_E( q_e_inject, m_e__GeV, T_e_cutoff__GeV ) );
         
         for (j = 0; j < n_T_CR; j++)//loop over cosmic ray proton energies
         {
-            v_st = fmin( f_vAi * v_Ai * (1. + 2.3e-3 * pow( sqrt(pow(T_CR__GeV[j],2) + 2. * m_p__GeV * T_CR__GeV[j]) , q_p_inject-1.) * 
+            v_st = fmin( f_vAi * v_Ai * (1. + 2.3e-3 * pow( sqrt(pow(T_CR__GeV[j],2) + 2. * m_p_GeV * T_CR__GeV[j]) , q_p_inject-1.) * 
                    pow(n_H__cmm3[i]/1e3, 1.5) * (chi/1e-4) * M_A/( u_LA/10. * C[i]/2e-7 )), c__cmsm1/1e5);//streaming speed in km/s
-            D__cm2sm1[i][j] = v_st * L_A * 1e5 * pc__cm;//diffusion coefficient in cm^2/s
+            D__cm2sm1[i][j] = v_st * L_A * 1e5 * pc_cm;//diffusion coefficient in cm^2/s
             tau_eff = 9.9 * Sig_gas__Msolpcm2[i]/1e3 * h__pc[i]/1e2 * 1e27/D__cm2sm1[i][j];
             Gam_0 = 41.2 * h__pc[i]/1e2 * v_st/1e3 * 1e27/D__cm2sm1[i][j];
             f_cal[i][j] = 1. - 1./( gsl_sf_hyperg_0F1( beta/(beta+1.) , tau_eff/pow(beta+1.,2) ) + 
@@ -215,10 +218,10 @@ if (i == 10){f_cal[i][j] = f_cal[i][j] * 0.1;}//test case
         {
             v_ste = fmin( f_vAi * v_Ai * (1. + 2.3e-3 * pow( sqrt(pow(T_CR__GeV[j],2) + 2. * m_e__GeV * T_CR__GeV[j]) , q_p_inject-1.) * 
                     pow(n_H__cmm3[i]/1e3, 1.5) * (chi/1e-4) * M_A/( u_LA/10. * C[i]/2e-7 )), c__cmsm1/1e5);//streaming speed in km/s
-            D_e__cm2sm1[i][j] = v_ste * L_A * 1e5 * pc__cm;//diffusion coefficient in cm^2/s
+            D_e__cm2sm1[i][j] = v_ste * L_A * 1e5 * pc_cm;//diffusion coefficient in cm^2/s
             D_e_z2__cm2sm1[i][j] = fmin( v_Ai * (1. + 2.3e-3 * pow( sqrt(pow(T_CR__GeV[j],2) + 2. * m_e__GeV * T_CR__GeV[j]) , q_p_inject-1.) * 
                                 pow(n_H__cmm3[i]/1e3/1e3, 1.5) * (1./1e-4) * M_A/( u_LA/10. * ((1.-f_cal[i][0]) * C[i])/2e-7 )), 
-                                c__cmsm1/1e5) * L_A * 1e5 * pc__cm; //diffusion coefficient in z^2 in cm^2/s
+                                c__cmsm1/1e5) * L_A * 1e5 * pc_cm; //diffusion coefficient in z^2 in cm^2/s
         }
 
     }
@@ -257,7 +260,7 @@ if (i == 10){f_cal[i][j] = f_cal[i][j] * 0.1;}//test case
 
     double nphot_params[7];//ISRF parameters
 
-        double E_phot_lims__GeV[2] = { E_BB_peak__GeV( T_0_CMB__K ) * 1e-4, 1.e-7 };//photon energy limits for ISRF integration in GeV
+        double E_phot_lims__GeV[2] = { E_BB_peak__GeV( T_0_CMB_K ) * 1e-4, 1.e-7 };//photon energy limits for ISRF integration in GeV
 
 
     size_t n_pts[2] = { 1000, 1000 };
@@ -272,7 +275,7 @@ if (i == 10){f_cal[i][j] = f_cal[i][j] * 0.1;}//test case
 
 
     IC_object ICo = load_IC_do_files( n_pts, E_gam_lims__GeV, E_CRe_lims__GeV, E_phot_lims__GeV,
-                                      (maxval( n_gal, z ) + 1.) * T_0_CMB__K, 0.5, 
+                                      (maxval( n_gal, z ) + 1.) * T_0_CMB_K, 0.5, 
                                       minval( n_gal, T_dust__K ), maxval( n_gal, T_dust__K ), 5., datadir );//load IC data objects
 
 

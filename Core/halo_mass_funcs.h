@@ -2,7 +2,6 @@
 #define halo_mass_funcs_h
 
 #include "spline_custom.h"
-
 #include <math.h>
 
 /* =========================
@@ -79,7 +78,7 @@ double halo_mass__Msol(struct halo_mass_obj hm_obj,
 {
     double logM1 = spline1D_eval(&hm_obj.logM1_hm_gso1D, z);
 
-    double Mstar0 = pow(10.,
+    double Mstar0 = pow(10., 
         spline1D_eval(&hm_obj.logMstar0_hm_gso1D, z));
 
     double beta  = spline1D_eval(&hm_obj.beta_hm_gso1D, z);
@@ -134,7 +133,6 @@ double R_half_mass__kpc( double R_e__kpc, double z )
 double R_vir__kpc( double R_half_mass__kpc )
 {
     return 35. * pow( 18.87 * R_half_mass__kpc, 1.07 );
-
 }
 
 #endif

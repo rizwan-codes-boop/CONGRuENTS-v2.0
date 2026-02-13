@@ -35,9 +35,6 @@ double E_e_high_norm = 1.e8;
 
 
 
-
-
-
 //Bremsstrahlung Peretti 2019 following Stecker 2971
 double sigma_brems_mb = 34.;
 
