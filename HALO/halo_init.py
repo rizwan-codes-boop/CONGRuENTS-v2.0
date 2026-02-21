@@ -483,7 +483,134 @@ class HaloCalculator:
         
         print("\n✓ Halo transport complete")
     
+        def get_results(self):
+        """
+        Package all results into a dictionary
+        
+        Returns
+        -------
+        dict
+            Dictionary containing all computed quantities
+        """
+        
+        return {
+            # Galaxy properties
+            'n_gal': self.n_gal,
+            'z': self.z,
+            'M_star': self.M_star,
+            'Re': self.Re,
+            'SFR': self.SFR,
+            
+            # Energy grids
+            'T_CR': self.T_CR,
+            'E_CRe': self.E_CRe,
+            'E_gam': self.E_gam,
+            
+            # Disc properties
+            'h_disc': self.h_disc,
+            'n_H_disc': self.n_H_disc,
+            'B_disc': self.B_disc,
+            
+            # Halo properties
+            'n_H_halo': self.n_H_halo,
+            'B_halo': self.B_halo,
+            'h_halo': self.h_halo,
+            
+            # Transport
+            'D_e_halo': self.D_e_halo,
+            'Q_e_halo': self.Q_e_halo,
+            
+            # Loss timescales
+            'tau_sync': self.tau_sync,
+            'tau_plasma': self.tau_plasma,
+            'tau_diff': self.tau_diff,
+            
+            # Steady-state spectrum
+            'N_e_halo': self.N_e_halo,
+        }
     
+    
+    def save_results(self, output_dir):
+        """
+        Save results to files
+        
+        Parameters
+        ----------
+        output_dir : str or Path
+            Directory to save outputs
+        """
+        
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        print(f"\nSaving results to {output_dir}...")
+        
+        # Halo properties
+        np.savetxt(
+            output_dir / 'halo_properties.txt',
+            np.column_stack([self.n_H_halo, self.B_halo, self.h_halo]),
+            header='n_H_halo[cm-3] B_halo[G] h_halo[pc]'
+        )
+        
+        # Energy grids
+        np.savetxt(output_dir / 'T_CR.txt', self.T_CR, header='T_CR[GeV]')
+        np.savetxt(output_dir / 'E_CRe.txt', self.E_CRe, header='E_CRe[GeV]')
+        
+        # Transport
+        np.savetxt(output_dir / 'D_e_halo.txt', self.D_e_halo,
+                  header='D_e_halo[cm2/s] - rows=galaxies, cols=energies')
+        np.savetxt(output_dir / 'Q_e_halo.txt', self.Q_e_halo,
+                  header='Q_e_halo[CRe/s/GeV]')
+        
+        # Loss times
+        np.savetxt(output_dir / 'tau_sync.txt', self.tau_sync, header='tau_sync[s]')
+        np.savetxt(output_dir / 'tau_plasma.txt', self.tau_plasma, header='tau_plasma[s]')
+        np.savetxt(output_dir / 'tau_diff.txt', self.tau_diff, header='tau_diff[s]')
+        
+        # Steady-state spectrum
+        np.savetxt(output_dir / 'N_e_halo.txt', self.N_e_halo,
+                  header='N_e_halo[CRe/cm3/GeV]')
+        
+        print("✓ Results saved")
+
+
+def main():
+    """Example usage"""
+    
+    import argparse
+    
+    parser = argparse.ArgumentParser(
+        description='Compute halo CR spectra'
+    )
+    parser.add_argument('galaxy_file', help='Galaxy catalogue')
+    parser.add_argument('disc_dir', help='Disc output directory')
+    parser.add_argument('output_dir', help='Output directory')
+    parser.add_argument('--threads', type=int, default=None,
+                       help='Number of OpenMP threads')
+    
+    args = parser.parse_args()
+    
+    # Initialize
+    hc = HaloCalculator(
+        galaxy_file=args.galaxy_file,
+        disc_dir=args.disc_dir,
+        n_threads=args.threads
+    )
+    
+    # Compute halo properties
+    hc.compute_halo_properties()
+    
+    # Compute transport
+    hc.compute_halo_transport()
+    
+    # Save results
+    hc.save_results(args.output_dir)
+    
+    print("\n" + "="*60)
+    print("Computation complete!")
+    print("="*60)
+
+
 
 if __name__ == '__main__':
     main()
