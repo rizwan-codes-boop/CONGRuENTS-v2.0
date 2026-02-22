@@ -484,14 +484,14 @@ class HaloCalculator:
         print("\n✓ Halo transport complete")
     
         def get_results(self):
-        """
-        Package all results into a dictionary
+          """
+            Package all results into a dictionary
         
-        Returns
-        -------
-        dict
-            Dictionary containing all computed quantities
-        """
+            Returns
+            -------
+            dict
+                Dictionary containing all computed quantities
+            """
         
         return {
             # Galaxy properties
