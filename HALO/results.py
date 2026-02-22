@@ -23,8 +23,6 @@ Usage:
     hr.plot_loss_times(galaxy_idx=0)
     hr.save_summary()
 
-Author: [Your name]
-Date: 2026
 ================================================================================
 """
 
