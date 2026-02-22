@@ -16,7 +16,7 @@
 #define PHYSICAL_CONSTANTS_H
 
 /* ============================================================
- * Fundamental constants (CGS)
+ * Fundamental constants 
  * ============================================================ */
 
 /* Speed of light [cm s^-1] */
@@ -36,6 +36,17 @@
 
 /* Boltzmann constant [erg K^-1] */
 #define k_B__ergKm1     1.380649e-16
+
+
+/* ============================================================
+ * Electromagnetic interaction constants
+ * ============================================================ */
+
+/* Thomson scattering cross-section [millibarn]
+ * σ_T = 6.6524587321 × 10^-25 cm^2 ≈ 665.24587321 mb
+ */
+#define sigma_T__mb     665.24587321
+
 
 /* ============================================================
  * Particle masses
@@ -88,7 +99,7 @@
 #define yr__s           3.15576e7
 
 /* ============================================================
- * Energy conversions
+ * conversions
  * ============================================================ */
 
 /* erg → GeV */
@@ -99,6 +110,9 @@
 
 /* eV → erg */
 #define eV__erg         1.60217663e-12
+
+/* millibarn → cm^2 */
+#define mb__cm2         1.0e-27
 
 /* ============================================================
  * Radiation / cosmology
