@@ -67,4 +67,27 @@ int main( int argc, char *argv[] )
                             c__cmsm1/1e5) * L_A * 1e5 * pc__cm; //diffusion coefficient in z^2 in cm^2/s
         }
 
+    //primary injection spectrum and steady state spline object per galaxy
+    for (j = 0; j < n_T_CR; j++)
+    {
+        Q_e_1_z2[i][j] = gsl_so1D_eval( qe_1_z1_so, E_CRe__GeV[j] )/tau_diff__s( E_CRe__GeV[j], h__pc[i], De_gso1D_z1 );
+    }
+    gso_1D_Q_inject_1_z2 = gsl_so1D( n_T_CR, E_CRe__GeV, Q_e_1_z2[i] );
+
+
+    //secondary injection spectrum and steady state spline object
+    for (j = 0; j < n_T_CR; j++)
+    {
+        Q_e_2_z2[i][j] = gsl_so1D_eval( qe_2_z1_so, E_CRe__GeV[j] )/tau_diff__s( E_CRe__GeV[j], h__pc[i], De_gso1D_z1 );
+    }
+
+    gso_1D_Q_inject_2_z2 = gsl_so1D( n_T_CR, E_CRe__GeV, Q_e_2_z2[i] );
+
+    CRe_steadystate_solve( 2, E_CRe_lims__GeV, 500, n_H__cmm3[i]/1000., B_halo__G[i], 50.*h__pc[i], 1, &gso2D_IC_Gamma, gso2D_BS,
+                               De_gso1D_z2, gso_1D_Q_inject_1_z2, gso_1D_Q_inject_2_z2, &qe_1_z2_so, &qe_2_z2_so );
+
+
 }
+
+
+
