@@ -2,11 +2,12 @@
 #define GSL_DECS_H
 
 #include <stdlib.h>
+
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_spline2d.h>
-#include <gsl/gsl_interp.h>
+#include <gsl/gsl_interp.h>      // contains gsl_interp_accel
 #include <gsl/gsl_interp2d.h>
-#include <gsl/gsl_interp_accel.h>
+
 
 /* ============================================================
    1D SPLINE OBJECT
