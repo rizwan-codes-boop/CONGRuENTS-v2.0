@@ -12,7 +12,7 @@ This module provides:
 
 Usage:
 ------
-    python results.py <output_dir> [options]s
+    python results.py <output_dir> [options]
     
     Or in Python:
     
@@ -23,6 +23,8 @@ Usage:
     hr.plot_loss_times(galaxy_idx=0)
     hr.save_summary()
 
+Author: [Your name]
+Date: 2026
 ================================================================================
 """
 
